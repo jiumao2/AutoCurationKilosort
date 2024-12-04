@@ -1,0 +1,49 @@
+{
+   "_schemaVersion": "1.0.0",
+   "labelKilosort":
+   {
+      "inputs":
+      [
+         {"name":"folder_data", "kind":"required", "type":"char"},
+         {"name":"cluster_ids", "kind":"required", "type":"numeric"},
+         {"name":"labels", "kind":"required"}
+      ]
+   },
+
+   "mergeCluster":
+   {
+      "inputs":
+      [
+         {"name":"folder_data", "kind":"required", "type":"char"},
+         {"name":"cluster_ids", "kind":"required", "type":"numeric"}
+      ]
+   },
+
+   "removeSpikes":
+   {
+      "inputs":
+      [
+         {"name":"folder_data", "kind":"required", "type":"char"},
+         {"name":"cluster_id", "kind":"required", "type":"numeric"},
+         {"name":"spike_ids", "kind":"required", "type":"numeric"}
+      ]
+   },
+
+   "splitCluster":
+   {
+      "inputs":
+      [
+         {"name":"folder_data", "kind":"required", "type":"char"},
+         {"name":"cluster_id", "kind":"required", "type":"numeric"},
+         {"name":"spike_id_A", "kind":"required", "type":"numeric"}
+      ]
+   },
+
+   "updateClusterInfo":
+   {
+      "inputs":
+      [
+         {"name":"folder_data", "kind":"required", "type":"char"}
+      ]
+   }
+}
