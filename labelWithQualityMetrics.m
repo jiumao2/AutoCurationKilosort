@@ -20,6 +20,9 @@ end
 
 QM = load(filename_QM);
 
+% Plot the metrics
+plotQualityMetrics(QM, fullfile(folder_data, 'Fig'));
+
 % Check the cluster_ids in the quality metrics are the same as the data
 spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
 cluster_ids_data = unique(spike_clusters);
