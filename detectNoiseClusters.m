@@ -36,6 +36,7 @@ duration_sec = double(max(spike_times) - min(spike_times))./30000;
 
 cluster_ids = unique(spike_clusters);
 idx_noise = [];
+
 for k = 1:length(cluster_ids)
     id = cluster_ids(k);
     spike_ids = find(spike_clusters == id);
@@ -43,6 +44,11 @@ for k = 1:length(cluster_ids)
     fr = length(spike_ids)./duration_sec;
     if fr < min_firing_rate
         idx_noise = [idx_noise, id];
+        fprintf('[fr = %.2f] Cluster %d is putative noise!\n', fr, id);
+
+        if mod(k, 50) == 1
+            fprintf('%d / %d done!\n', k, length(cluster_ids));
+        end
         continue
     end
 
@@ -61,9 +67,14 @@ for k = 1:length(cluster_ids)
     variance_baseline = mean(baselines(:).^2);
 
     snr_this = amplitude.^2./variance_baseline;
+
     if snr_this < min_signal_to_noise_ratio
         fprintf('[snr = %.2f] Cluster %d is putative noise!\n', snr_this, id);
         idx_noise = [idx_noise, id];
+
+        if mod(k, 50) == 1
+            fprintf('%d / %d done!\n', k, length(cluster_ids));
+        end
         continue
     end
     

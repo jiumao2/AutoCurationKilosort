@@ -28,7 +28,6 @@ n_random_spikes = user_settings.merging.n_random_spikes;
 waveform_window = user_settings.merging.waveform_window;
 max_distance_um = user_settings.merging.max_distance_um;
 binwidth_firing_rate_sec = user_settings.merging.binwidth_firing_rate_sec;
-% isi_violation_thres = user_settings.merging.isi_violation_thres;
 min_mean_cross_corr = user_settings.merging.min_mean_cross_corr;
 cross_corr_range = user_settings.merging.cross_corr_range;
 cross_corr_gaussian_kernel = user_settings.merging.cross_corr_gaussian_kernel;
@@ -146,9 +145,6 @@ for k = 1:length(cluster_id_non_noise)
             fprintf('[Cluster %d | Cluster %d] Failed to pass the timing complementarity test!\n',...
                     cluster_id_non_noise(k),...
                     cluster_id_non_noise(j));
-            if mod(k, 10) == 1
-                fprintf('%d / %d done!\n', k, length(cluster_id_non_noise));
-            end
             continue
         end
 
@@ -184,9 +180,6 @@ for k = 1:length(cluster_id_non_noise)
                 fprintf('[Cluster %d | Cluster %d] Failed to pass the refactory period test!\n',...
                     cluster_id_non_noise(k),...
                     cluster_id_non_noise(j));
-                if mod(k, 10) == 1
-                    fprintf('%d / %d done!\n', k, length(cluster_id_non_noise));
-                end
                 continue
             end
 
@@ -198,9 +191,6 @@ for k = 1:length(cluster_id_non_noise)
                 fprintf('[Cluster %d | Cluster %d] Failed to pass cross correlogram metric!\n',...
                     cluster_id_non_noise(k),...
                     cluster_id_non_noise(j));
-                if mod(k, 10) == 1
-                    fprintf('%d / %d done!\n', k, length(cluster_id_non_noise));
-                end
                 continue
             end
         end
@@ -221,9 +211,6 @@ for k = 1:length(cluster_id_non_noise)
                 fprintf('[Cluster %d | Cluster %d] Failed to pass raster metric!\n',...
                     cluster_id_non_noise(k),...
                     cluster_id_non_noise(j));
-                if mod(k, 10) == 1
-                    fprintf('%d / %d done!\n', k, length(cluster_id_non_noise));
-                end
                 continue
             else
                 fprintf('[Cluster %d | Cluster %d] Passed the final raster metric [%s]!\n',...

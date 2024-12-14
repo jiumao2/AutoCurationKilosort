@@ -8,7 +8,7 @@ function [x, y, z, ptt] = spikeLocation(waveforms_mean, chanMap, n_nearest_chann
 % > https://spikeinterface.readthedocs.io/en/stable/modules/postprocessing.html#spike-locations
 
 if nargin < 3
-    n_nearest_channels = 10;
+    n_nearest_channels = 20;
 end
 if nargin < 4
     algorithm = 'monopolar_triangulation';
@@ -36,7 +36,7 @@ loc_this = channel_locations(idx_included,:);
 
 loc_center_to_mass = sum(loc_this.*ptt_this, 1)./sum(ptt_this);
 
-if strcmpi(algorithm, 'center_to_mass')
+if strcmpi(algorithm, 'center_of_mass')
     x = loc_center_to_mass(1);
     y = loc_center_to_mass(2);
     z = 0;

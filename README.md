@@ -37,3 +37,11 @@ setting_filenames = 'path_to_AutoCurationKilosort/settings.json';
 - It is laborious to curate the waveforms of each unit by remove the large noise in the waveforms
 - It is difficult to find the potential splits and merges and make the dicisions
 - It is error-prone and inconsistant to label the units as 'good' or 'mua' manually
+
+
+
+
+## References for code
+
+> Sean Bone (2024). JSON+C parsing for MATLAB (https://github.com/seanbone/matlab-json-c/releases/tag/v1.1), GitHub.
+> Algorithm AS 217 APPL. STATIST. (1985) Vol. 34. No.3 pg 322-325

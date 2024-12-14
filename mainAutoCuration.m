@@ -3,6 +3,7 @@ setting_filenames = 'C:\Users\jiumao\Desktop\AutoCurationKilosort\settings.json'
 
 % read the settings
 userSettings = jsondecode(fileread(setting_filenames));
+user_settings = userSettings;
 
 % remove clusters which are pure noise
 detectNoiseClusters(folder_data, userSettings);

@@ -14,7 +14,7 @@ function realignSpikeTimes(folder_data, user_settings)
 n_random_spikes = user_settings.realignSpikeTimes.n_random_spikes;
 waveform_window = user_settings.realignSpikeTimes.waveform_window;
 baseline_window = user_settings.realignSpikeTimes.baseline_window - waveform_window(1) + 1;
-n_max_channels = 4;
+n_channels_included = user_settings.realignSpikeTimes.n_channels_included;
 verbose = user_settings.realignSpikeTimes.verbose;
 
 % load the data
@@ -57,7 +57,7 @@ for k = 1:length(cluster_ids)
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
     [~, idx_sort] = sort(max(mean_waveforms,[],2) - min(mean_waveforms,[],2), 'descend');
     ch_largest = idx_sort(1);
-    ch_included = idx_sort(1:n_max_channels);
+    ch_included = idx_sort(1:n_channels_included);
     
     baseline = mean(mean_waveforms(baseline_window));
     if abs(max(mean_waveforms(ch_largest,:))- baseline) < abs(min(mean_waveforms(ch_largest,:))- baseline)
@@ -75,7 +75,7 @@ for k = 1:length(cluster_ids)
     spike_times_this = spike_times_this + dsample_template;
 
     % get all the waveforms of the largest channels
-    waveforms = zeros(length(spike_times_this), n_max_channels, diff(waveform_window)+1); % nSpikes x 64
+    waveforms = zeros(length(spike_times_this), n_channels_included, diff(waveform_window)+1); % nSpikes x 64
     for j = 1:length(spike_times_this)
         waveforms(j,:,:) = mmap.Data.x(ch_included,...
             spike_times_this(j) + waveform_window(1):spike_times_this(j) + waveform_window(2));
@@ -87,7 +87,7 @@ for k = 1:length(cluster_ids)
     templates_flatten = temp(:)';
     
     temp = permute(waveforms, [3,2,1]);
-    waveforms_flatten = reshape(temp, n_max_channels*(diff(waveform_window)+1), length(spike_times_this));
+    waveforms_flatten = reshape(temp, n_channels_included*(diff(waveform_window)+1), length(spike_times_this));
     waveforms_flatten = waveforms_flatten';
 
     % realign each spike through convolution
@@ -108,12 +108,12 @@ for k = 1:length(cluster_ids)
 
     if verbose
         fig = EasyPlot.figure();
-        ax = EasyPlot.createGridAxes(fig, 1, n_max_channels,...
+        ax = EasyPlot.createGridAxes(fig, 1, n_channels_included,...
             'Width', 3,...
             'Height', 3,...
             'MarginLeft', 0.1,...
             'MarginRight', 0.1,...
-            'XAxisVisible','off',...
+            'XAxisVisible','on',...
             'YAxisVisible', 'off');
 
         n_plot = min(100, length(dsample));
@@ -122,11 +122,11 @@ for k = 1:length(cluster_ids)
 
         x_waveform = waveform_window(1):waveform_window(2);
 
-        for j = 1:n_max_channels
+        for j = 1:n_channels_included
             plot(ax{j}, x_waveform, squeeze(waveforms(idx_plot,j,:)), 'b-');
         end
         
-        for i = 1:n_max_channels
+        for i = 1:n_channels_included
             x_plot = [];
             y_plot = [];
             for j = 1:length(idx_plot)
