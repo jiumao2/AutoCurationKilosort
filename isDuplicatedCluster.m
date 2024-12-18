@@ -49,7 +49,7 @@ num_overlap_A = sum(abs(stA - stB(idx_nearest)) < dt_sample);
 idx_nearest = findNearestPoint(stA, stB);
 num_overlap_B = sum(abs(stB - stA(idx_nearest)) < dt_sample);
 
-if num_overlap_A / length(stA) < overlap_percentage*100 && num_overlap_B / length(stB) < overlap_percentage*100
+if num_overlap_A / length(stA) < overlap_percentage/100 && num_overlap_B / length(stB) < overlap_percentage/100
     is_duplicated = false;
     return
 end
