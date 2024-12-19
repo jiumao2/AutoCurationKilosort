@@ -1,4 +1,4 @@
-function realignSpikeTimes(folder_data, user_settings)
+function realignClusterSpikeTimes(folder_data, user_settings)
 % REALIGNSPIKETIMES realign the spike times of good/mua clusters to center
 % the peaks / troughs. It is helpful for getting a better mean waveforms
 % and tracking units across days.
@@ -57,7 +57,6 @@ for k = 1:length(cluster_ids)
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
     [~, idx_sort] = sort(max(mean_waveforms,[],2) - min(mean_waveforms,[],2), 'descend');
     ch_largest = idx_sort(1);
-    ch_included = idx_sort(1:n_channels_included);
     
     baseline = mean(mean_waveforms(baseline_window));
     if abs(max(mean_waveforms(ch_largest,:))- baseline) < abs(min(mean_waveforms(ch_largest,:))- baseline)
@@ -72,43 +71,14 @@ for k = 1:length(cluster_ids)
 
     % realign the spike times
     assert(length(dsample_template) == 1);
-    spike_times_this = spike_times_this + dsample_template;
-
-    % get all the waveforms of the largest channels
-    waveforms = zeros(length(spike_times_this), n_channels_included, diff(waveform_window)+1); % nSpikes x 64
-    for j = 1:length(spike_times_this)
-        waveforms(j,:,:) = mmap.Data.x(ch_included,...
-            spike_times_this(j) + waveform_window(1):spike_times_this(j) + waveform_window(2));
-    end
-
-    templates = squeeze(mean(waveforms, 1)); % n_max_channels x 64
-
-    temp = templates';
-    templates_flatten = temp(:)';
-    
-    temp = permute(waveforms, [3,2,1]);
-    waveforms_flatten = reshape(temp, n_channels_included*(diff(waveform_window)+1), length(spike_times_this));
-    waveforms_flatten = waveforms_flatten';
-
-    % realign each spike through convolution
-    max_lag = min(abs(waveform_window));
-    dsample = zeros(length(spike_times_this), 1); % size(waveforms_flatten, 1) x n_conv
-    for j = 1:length(spike_times_this)
-        [r, lags] = xcorr(waveforms_flatten(j,:), templates_flatten, max_lag);
-        [~, idx_max] = max(r);
-
-        dsample(j) = lags(idx_max);
-    end
-    
-    assert(length(dsample) == length(spike_times_this));
-    spike_times_new = spike_times_this + uint64(dsample);
-    spike_times(spike_ids) = spike_times_new;
+    spike_times_this = spike_times_this + uint64(dsample_template);
+    spike_times(spike_ids) = spike_times_this;
 
     fprintf('%d / %d done!\n', k, length(cluster_ids));
 
     if verbose
         fig = EasyPlot.figure();
-        ax = EasyPlot.createGridAxes(fig, 1, n_channels_included,...
+        ax = EasyPlot.axes(fig,...
             'Width', 3,...
             'Height', 3,...
             'MarginLeft', 0.1,...
@@ -116,32 +86,26 @@ for k = 1:length(cluster_ids)
             'XAxisVisible','on',...
             'YAxisVisible', 'off');
 
-        n_plot = min(100, length(dsample));
-        [~, idx_plot] = sort(abs(dsample - mean(dsample)), 'descend');
-        idx_plot = idx_plot(1:n_plot);
+        n_plot = min(100, n_waveforms);
+        idx_plot = randperm(size(waveforms, 1), n_plot);
 
         x_waveform = waveform_window(1):waveform_window(2);
+        plot(ax, x_waveform, squeeze(waveforms(idx_plot,ch_largest,:)), 'b-');
 
-        for j = 1:n_channels_included
-            plot(ax{j}, x_waveform, squeeze(waveforms(idx_plot,j,:)), 'b-');
+       
+        x_plot = [];
+        y_plot = [];
+        for j = 1:length(idx_plot)
+            x_plot = [x_plot, x_waveform-dsample_template, NaN];
+            y_plot = [y_plot, squeeze(waveforms(idx_plot(j),ch_largest,:))', NaN];
         end
-        
-        for i = 1:n_channels_included
-            x_plot = [];
-            y_plot = [];
-            for j = 1:length(idx_plot)
-                x_plot = [x_plot, x_waveform-dsample(idx_plot(j)), NaN];
-                y_plot = [y_plot, squeeze(waveforms(idx_plot(j),i,:))', NaN];
-            end
-            plot(ax{i}, x_plot, y_plot, 'r-');
-        end
+        plot(ax, x_plot, y_plot, 'r-');
+
         EasyPlot.setXLim(ax, [waveform_window(1), waveform_window(2)]);
-        EasyPlot.setYLim(ax);
-
         EasyPlot.setGeneralTitle(ax, ['Cluster ', num2str(cluster_ids(k)), ' (', labels{k}, ')']);
         EasyPlot.cropFigure(fig);
 
-        output_folder = fullfile(folder_data, 'Fig/RealignClusters/');
+        output_folder = fullfile(folder_data, 'Fig/RealignClusterTemplates/');
         if ~exist(output_folder, 'dir')
             mkdir(output_folder);
         end

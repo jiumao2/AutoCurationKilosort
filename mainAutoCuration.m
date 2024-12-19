@@ -2,8 +2,7 @@ folder_data = 'D:\Pierce\20241116\catgt_Exp_g0';
 setting_filenames = 'C:\Users\jiumao\Desktop\AutoCurationKilosort\settings.json';
 
 % read the settings
-userSettings = jsondecode(fileread(setting_filenames));
-user_settings = userSettings;
+userSettings = jsonc.jsoncDecode(fileread(setting_filenames));
 
 % remove clusters which are pure noise
 detectNoiseClusters(folder_data, userSettings);
@@ -26,8 +25,7 @@ computeQualityMetrics(folder_data);
 labelWithQualityMetrics(folder_data, userSettings);
 
 % realign the spike times
-realignSpikeTimes(folder_data, userSettings);
+realignClusterSpikeTimes(folder_data, userSettings);
 
 % output to cluster_info.tsv
 updateClusterInfo(folder_data);
-
