@@ -49,10 +49,17 @@ for k = 1:length(cluster_ids)
     n_waveforms = min(length(spike_times_this), n_random_spikes);
     idx_rand = randperm(length(spike_times_this), n_waveforms);
     waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+
+    idx_remove = [];
     for j = 1:n_waveforms
+        if spike_times_this(idx_rand(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+            idx_remove = [idx_remove, j];
+            continue
+        end
         waveforms(j,:,:) = mmap.Data.x(:,...
             spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
     end
+    waveforms(idx_remove,:,:) = [];
 
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
     [~, idx_sort] = sort(max(mean_waveforms,[],2) - min(mean_waveforms,[],2), 'descend');
@@ -73,8 +80,10 @@ for k = 1:length(cluster_ids)
     assert(length(dsample_template) == 1);
     spike_times_this = spike_times_this + uint64(dsample_template);
     spike_times(spike_ids) = spike_times_this;
-
-    fprintf('%d / %d done!\n', k, length(cluster_ids));
+    
+    if mod(k, 20) == 1
+        fprintf('%d / %d done!\n', k, length(cluster_ids));
+    end
 
     if verbose
         fig = EasyPlot.figure();
@@ -117,5 +126,6 @@ end
 
 % save the realigned spike times
 updateSpikeTimes(folder_data, spike_times);
+disp('Spike times are realigned!');
 
 end
