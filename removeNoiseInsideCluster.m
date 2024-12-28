@@ -66,10 +66,18 @@ for k = 1:length(cluster_non_noise)
     n_waveforms = min(length(spike_times_this), n_random_spikes);
     idx_rand = randperm(length(spike_times_this), n_waveforms);
     waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+
+    idx_remove = [];
     for j = 1:n_waveforms
+        if spike_times_this(idx_rand(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+            idx_remove = [idx_remove, j];
+            continue
+        end
+
         waveforms(j,:,:) = mmap.Data.x(:,...
             spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
     end
+    waveforms(idx_remove,:,:) = [];
     
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
     [~, ch_largest] = max(max(mean_waveforms,[],2) - min(mean_waveforms,[],2));

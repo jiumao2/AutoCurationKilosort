@@ -92,5 +92,8 @@ for k = 1:length(metrics.metrics)
 end
 
 EasyPlot.cropFigure(fig);
+if ~exist(folder, 'dir')
+    mkdir(folder);
+end
 EasyPlot.exportFigure(fig, fullfile(folder, 'MetricsDistribution.png'));
 end
