@@ -1,0 +1,4 @@
+
+[submodule "Utils/EasyPlot"]
+	path = Utils/EasyPlot
+	url = git://github.com/jiumao2/EasyPlot

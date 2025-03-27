@@ -1,4 +1,5 @@
 # AutoCurationKilosort: (Semi-) Automated Curation for Kilosort Output
+[![View Kilomatch on GitHub](https://img.shields.io/badge/GitHub-AutoCurationKilosort-blue.svg)](https://github.com/jiumao2/AutoCurationKilosort)
 
 A tool designed to assist researchers in automating the curation process of Kilosort outputs. It helps streamline the curation of sorting results, reducing manual effort while maintaining control over the final output for increased accuracy and trustworthiness.
 
@@ -38,10 +39,8 @@ setting_filenames = 'path_to_AutoCurationKilosort/settings.json';
 - It is difficult to find the potential splits and merges and make the dicisions
 - It is error-prone and inconsistant to label the units as 'good' or 'mua' manually
 
-
-
-
 ## References for code
 
-> Sean Bone (2024). JSON+C parsing for MATLAB (https://github.com/seanbone/matlab-json-c/releases/tag/v1.1), GitHub.
+> [Quility metrics](https://allensdk.readthedocs.io/en/latest/_static/examples/nb/ecephys_quality_metrics.html)  
+> Sean Bone (2024). JSON+C parsing for MATLAB (https://github.com/seanbone/matlab-json-c/releases/tag/v1.1), GitHub.  
 > Algorithm AS 217 APPL. STATIST. (1985) Vol. 34. No.3 pg 322-325

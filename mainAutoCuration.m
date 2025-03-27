@@ -1,5 +1,12 @@
+path_autocuration = 'C:\Users\jiumao\Desktop\AutoCurationKilosort';
 folder_data = 'D:\Pierce\20241116\catgt_Exp_g0';
 setting_filenames = 'C:\Users\jiumao\Desktop\AutoCurationKilosort\settings.json';
+
+% add the path
+addpath(path_autocuration);
+addpath(fullfile(path_autocuration, 'PhyManipulations/'));
+addpath(fullfile(path_autocuration, 'QualityMetrics/'));
+addpath(genpath(fullfile(path_autocuration, 'Utils/')));
 
 % read the settings
 userSettings = jsonc.jsoncDecode(fileread(setting_filenames));
