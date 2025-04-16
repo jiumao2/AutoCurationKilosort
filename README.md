@@ -1,4 +1,4 @@
-# AutoCurationKilosort: (Semi-) Automated Curation for Kilosort Output
+# AutoCurationKilosort: Automated Curation for Kilosort Output
 [![View Kilomatch on GitHub](https://img.shields.io/badge/GitHub-AutoCurationKilosort-blue.svg)](https://github.com/jiumao2/AutoCurationKilosort)
 
 A tool designed to assist researchers in automating the curation process of Kilosort outputs. It helps streamline the curation of sorting results, reducing manual effort while maintaining control over the final output for increased accuracy and trustworthiness.
@@ -37,6 +37,10 @@ setting_filenames = 'path_to_AutoCurationKilosort/settings.json';
 - It is tiring to look at thousands of units, after you have gained the clear understanding of the data
 - It is laborious to curate the waveforms of each unit by remove the large noise in the waveforms
 - It is error-prone and inconsistant to label the units as 'good' or 'mua' manually
+
+## Documentation
+
+See [Documentation.md](Documentation.md) for details.
 
 ## References for code
 
