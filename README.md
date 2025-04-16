@@ -36,7 +36,6 @@ setting_filenames = 'path_to_AutoCurationKilosort/settings.json';
 - Do not waste time on the clearly bad units (noise)
 - It is tiring to look at thousands of units, after you have gained the clear understanding of the data
 - It is laborious to curate the waveforms of each unit by remove the large noise in the waveforms
-- It is difficult to find the potential splits and merges and make the dicisions
 - It is error-prone and inconsistant to label the units as 'good' or 'mua' manually
 
 ## References for code

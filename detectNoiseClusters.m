@@ -10,7 +10,7 @@ function detectNoiseClusters(folder_data, user_settings)
 %
 % Determination of noise:
 %   (1) Firing rate < 0.05 Hz
-%   (2) Signal-to-noise ratio > 2
+%   (2) Signal-to-noise ratio > 3
 %
 
 % load the params

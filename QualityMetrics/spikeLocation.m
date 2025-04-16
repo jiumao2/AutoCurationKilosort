@@ -47,17 +47,6 @@ end
 
 % calculate the monopolar_triangulation location
 
-% % fminunc
-% fun = @(x) sum(...
-%     (ptt_this - x(4)./sqrt((loc_this(:,1)-x(1)).^2 + (loc_this(:,2)-x(2)).^2 + x(3).^2)).^2);
-% 
-% x0 = [loc_center_to_mass, 1, ptt_max];
-% 
-% options = optimoptions('fminunc', 'MaxFunctionEvaluations', 1e4);
-% loc_monopolar_triangulation = fminunc(fun, x0, options);
-% x = loc_monopolar_triangulation(1);
-% y = loc_monopolar_triangulation(2);
-
 % nonlinear least-square fitting
 fun = @(x, loc_this) x(4)./sqrt((loc_this(:,1)-x(1)).^2 + (loc_this(:,2)-x(2)).^2 + x(3).^2);
 x_bound_lower = [loc_center_to_mass(1)-1000, loc_center_to_mass(2)-1000, 0, 0];
@@ -71,4 +60,5 @@ x = loc_monopolar_triangulation(1);
 y = loc_monopolar_triangulation(2);
 z = loc_monopolar_triangulation(3);
 ptt = loc_monopolar_triangulation(4);
+
 end
