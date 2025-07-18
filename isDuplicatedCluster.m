@@ -34,8 +34,8 @@ if nargin < 6
     spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
 end
 
-stA = spike_times(spike_clusters == cluster_id_A);
-stB = spike_times(spike_clusters == cluster_id_B);
+stA = int64(spike_times(spike_clusters == cluster_id_A));
+stB = int64(spike_times(spike_clusters == cluster_id_B));
 
 if isempty(stA) || isempty(stB)
     is_duplicated = false;
