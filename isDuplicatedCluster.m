@@ -69,10 +69,18 @@ for k = 1:2
     n_waveforms = min(length(st_all{k}), n_random_spikes);
     idx_rand = randperm(length(st_all{k}), n_waveforms);
     waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+
+    idx_remove = [];
     for j = 1:n_waveforms
+        if st_all{k}(idx_rand(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+            idx_remove = [idx_remove, j];
+            continue
+        end
+
         waveforms(j,:,:) = mmap.Data.x(:,...
             st_all{k}(idx_rand(j)) + waveform_window(1):st_all{k}(idx_rand(j)) + waveform_window(2));
     end
+    waveforms(idx_remove,:,:) = [];
 
     waveforms_all{k} = waveforms;
 
