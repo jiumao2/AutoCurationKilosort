@@ -117,10 +117,18 @@ for k = 1:length(cluster_non_noise)
         % extract the waveforms of outliers
         n_outliers = sum(is_outliers);
         idx_outlier = find(is_outliers);
+
         waveforms_outliers = zeros(n_outliers, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+        idx_remove = [];
         for j = 1:n_outliers
+            if spike_times_this(idx_outlier(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+                idx_remove = [idx_remove, j];
+                continue
+            end
+
             waveforms_outliers(j,:,:) = mmap.Data.x(:, spike_times_this(idx_outlier(j)) + waveform_window(1):spike_times_this(idx_outlier(j)) + waveform_window(2));
         end
+        waveforms_outliers(idx_remove,:,:) = [];
 
         fig = EasyPlot.figure();
         ax_waveform = EasyPlot.axes(fig,...
