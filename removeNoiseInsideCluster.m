@@ -130,35 +130,37 @@ for k = 1:length(cluster_non_noise)
         end
         waveforms_outliers(idx_remove,:,:) = [];
 
-        fig = EasyPlot.figure();
-        ax_waveform = EasyPlot.axes(fig,...
-            'Width', 6,...
-            'Height', 6,...
-            'XAxisVisible', 'off',...
-            'YAxisVisible', 'off');
-        ax_feature = EasyPlot.createAxesAgainstAxes(fig, ax_waveform, 'right',...
-            'MarginBottom', 1,...
-            'MarginLeft', 1);
-
-
-        plot(ax_waveform, 1:diff(waveform_window)+1, squeeze(waveforms(:,ch_largest,:)), 'k-');
-        plot(ax_waveform, 1:diff(waveform_window)+1, squeeze(waveforms_outliers(:,ch_largest,:)), 'r-');
-        title(ax_waveform, ['Outliers: ', num2str(n_outliers), '/', num2str(length(spike_times_this))]);
-        
-        plot(ax_feature, pc_features_this(:,1), pc_features_this(:,2), 'k.');
-        plot(ax_feature, pc_features_this(idx_outlier,1), pc_features_this(idx_outlier,2), 'r.');
-        xlabel(ax_feature, 'PC1');
-        ylabel(ax_feature, 'PC2');
-        EasyPlot.cropFigure(fig);
-        title(ax_feature, ['Cluster ', num2str(id)]);
-
-        output_folder = fullfile(folder_data, 'Fig/RemoveWaveforms/');
-        if ~exist(output_folder, 'dir')
-            mkdir(output_folder);
+        if ~isempty(waveforms_outliers)
+            fig = EasyPlot.figure();
+            ax_waveform = EasyPlot.axes(fig,...
+                'Width', 6,...
+                'Height', 6,...
+                'XAxisVisible', 'off',...
+                'YAxisVisible', 'off');
+            ax_feature = EasyPlot.createAxesAgainstAxes(fig, ax_waveform, 'right',...
+                'MarginBottom', 1,...
+                'MarginLeft', 1);
+    
+    
+            plot(ax_waveform, 1:diff(waveform_window)+1, squeeze(waveforms(:,ch_largest,:)), 'k-');
+            plot(ax_waveform, 1:diff(waveform_window)+1, squeeze(waveforms_outliers(:,ch_largest,:)), 'r-');
+            title(ax_waveform, ['Outliers: ', num2str(n_outliers), '/', num2str(length(spike_times_this))]);
+            
+            plot(ax_feature, pc_features_this(:,1), pc_features_this(:,2), 'k.');
+            plot(ax_feature, pc_features_this(idx_outlier,1), pc_features_this(idx_outlier,2), 'r.');
+            xlabel(ax_feature, 'PC1');
+            ylabel(ax_feature, 'PC2');
+            EasyPlot.cropFigure(fig);
+            title(ax_feature, ['Cluster ', num2str(id)]);
+    
+            output_folder = fullfile(folder_data, 'Fig/RemoveWaveforms/');
+            if ~exist(output_folder, 'dir')
+                mkdir(output_folder);
+            end
+            output_filename = ['Cluster', num2str(id)];
+            EasyPlot.exportFigure(fig, fullfile(output_folder, output_filename));
+            close all;
         end
-        output_filename = ['Cluster', num2str(id)];
-        EasyPlot.exportFigure(fig, fullfile(output_folder, output_filename));
-        close all;
     end
 
     % remove the outliers
