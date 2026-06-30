@@ -1,6 +1,6 @@
-path_autocuration = 'C:\Users\jiumao\Desktop\AutoCurationKilosort';
-folder_data = 'D:\Pierce\20241116\catgt_Exp_g0';
-setting_filenames = 'C:\Users\jiumao\Desktop\AutoCurationKilosort\settings.json';
+path_autocuration = 'path_to_AutoCurationKilosort\AutoCurationKilosort';
+folder_data = './catgt_Exp_g0';
+setting_filenames = 'path_to_settings/settings.json';
 
 % add the path
 addpath(path_autocuration);
@@ -28,7 +28,7 @@ removeNoiseInsideCluster(folder_data, userSettings);
 removeDuplicatedClusters(folder_data, userSettings);
 
 % determine the quality of each cluster
-computeQualityMetrics(folder_data);
+computeQualityMetrics(folder_data, userSettings);
 labelWithQualityMetrics(folder_data, userSettings);
 
 % realign the spike times

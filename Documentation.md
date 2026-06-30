@@ -35,8 +35,8 @@ The curation process runs through the following sequential steps:
 ## 🚀 Usage Guide
 
 1. **Configure Settings:** Open `settings.json` to define your curation parameters (see the tables below).
-2. **Setup Script:** Copy `AutoCurationKilosort.m` into your active data folder. 
-3. **Update Paths:** Edit the installation and data paths inside the script to match your local directories:
+2. **Setup Script:** Open `mainAutoCuration.m` in the repository root.
+3. **Update Paths:** Edit the installation, data, and settings paths inside the script to match your local directories:
 
 ```matlab
 path_autocuration = 'path_to_AutoCurationKilosort\AutoCurationKilosort';
@@ -44,7 +44,7 @@ folder_data = './catgt_Exp_g0';
 setting_filenames = 'path_to_settings/settings.json';
 ```
 
-4. **Execute:** Run `AutoCurationKilosort.m` in MATLAB.
+4. **Execute:** Run `mainAutoCuration.m` in MATLAB.
 
 ## 🎛️ Configuration Parameters (`settings.json`)
 

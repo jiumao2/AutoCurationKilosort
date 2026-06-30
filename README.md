@@ -35,14 +35,15 @@ addpath(genpath('path_to_AutoCurationKilosort'))
 Edit the settings.json file to set your specific curation parameters.
 
 ### 3. Run the Curation
-Copy `AutoCurationKilosort.m` to your data folder. Edit the installation paths in the script to match your local setup:
+Open `mainAutoCuration.m` and edit the installation, data, and settings paths in the script to match your local setup:
 
 ```matlab
+path_autocuration = 'path_to_AutoCurationKilosort\AutoCurationKilosort';
 folder_data = './catgt_Exp_g0';
-setting_filenames = 'path_to_AutoCurationKilosort/settings.json';
+setting_filenames = 'path_to_settings/settings.json';
 ```
 
-Finally, run the script `AutoCurationKilosort.m` in MATLAB.
+Finally, run the script `mainAutoCuration.m` in MATLAB.
 
 ## 📖 Documentation
 See [Documentation.md](Documentation.md) for details on the pipeline algorithms and advanced configuration.
