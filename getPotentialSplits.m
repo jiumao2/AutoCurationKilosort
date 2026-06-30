@@ -29,11 +29,11 @@ verbose = user_settings.merging.verbose;
 % load the data
 spike_times = readNPY(fullfile(folder_data, 'spike_times.npy'));
 spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
-path_data = fullfile(folder_data, 'temp_wh.dat');
-load(fullfile(folder_data, 'ops.mat'));
+path_data = getKilosortTempWhPath(folder_data);
+n_channels = getKilosortNChannels(folder_data);
 dir_output = dir(path_data);
-nFileSamp = dir_output.bytes ./ 2 ./ ops.Nchan;
-mmap = memmapfile(path_data, 'Format', {'int16', [ops.Nchan, nFileSamp], 'x'});
+nFileSamp = dir_output.bytes ./ 2 ./ n_channels;
+mmap = memmapfile(path_data, 'Format', {'int16', [n_channels, nFileSamp], 'x'});
 
 cluster_ids = unique(spike_clusters);
 
@@ -57,10 +57,20 @@ for k = 1:length(cluster_id_non_noise)
 
     n_waveforms = min(length(spike_times_this), n_random_spikes);
     idx_rand = randperm(length(spike_times_this), n_waveforms);
-    waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+    waveforms = zeros(n_waveforms, n_channels, diff(waveform_window)+1);
+    idx_remove = [];
     for j = 1:n_waveforms
-        waveforms(j,:,:) = mmap.Data.x(:,...
-            spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
+        t0 = spike_times_this(idx_rand(j)) + waveform_window(1);
+        t1 = spike_times_this(idx_rand(j)) + waveform_window(2);
+        if t0 < 1 || t1 > size(mmap.Data.x, 2)
+            idx_remove = [idx_remove, j];
+            continue
+        end
+        waveforms(j,:,:) = mmap.Data.x(:, t0:t1);
+    end
+    waveforms(idx_remove,:,:) = [];
+    if isempty(waveforms)
+        continue
     end
 
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
@@ -90,8 +100,15 @@ for k = 1:length(cluster_id_non_noise)
     end
     
     % read the full data for splitting
-    data_all = mmap.Data.x(ch_included(split_place(1)),...
-        spike_times_this + waveform_window(1)+split_place(2)-1);
+    t_samples = spike_times_this + waveform_window(1)+split_place(2)-1;
+    idx_valid = t_samples >= 1 & t_samples <= size(mmap.Data.x, 2);
+    t_samples = t_samples(idx_valid);
+    spike_ids = spike_ids(idx_valid);
+    spike_times_this = spike_times_this(idx_valid);
+    if isempty(t_samples)
+        continue
+    end
+    data_all = mmap.Data.x(ch_included(split_place(1)), t_samples);
     data_all = squeeze(double(data_all'));
 
     idx = kmeans(data_all, 2);

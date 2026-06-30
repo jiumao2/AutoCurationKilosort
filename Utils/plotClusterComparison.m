@@ -5,15 +5,15 @@ function plotClusterComparison(folder_data, spike_id_A, spike_id_B, title_name, 
     waveform_window = [-31,32];
 
     % load the data
-    path_data = fullfile(folder_data, 'temp_wh.dat');
+    path_data = getKilosortTempWhPath(folder_data);
     amplitudes = readNPY(fullfile(folder_data, 'amplitudes.npy'));
     spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
     spike_times = readNPY(fullfile(folder_data, 'spike_times.npy'));
     spike_templates = readNPY(fullfile(folder_data, 'spike_templates.npy'));
-    load(fullfile(folder_data, 'ops.mat'));
+    n_channels = getKilosortNChannels(folder_data);
     dir_output = dir(path_data);
-    nFileSamp = dir_output.bytes ./ 2 ./ ops.Nchan;
-    mmap = memmapfile(path_data, 'Format', {'int16', [ops.Nchan, nFileSamp], 'x'});
+    nFileSamp = dir_output.bytes ./ 2 ./ n_channels;
+    mmap = memmapfile(path_data, 'Format', {'int16', [n_channels, nFileSamp], 'x'});
 
     spike_id_all = {spike_id_A, spike_id_B};
     waveforms_all = cell(1,2);
@@ -25,11 +25,18 @@ function plotClusterComparison(folder_data, spike_id_A, spike_id_B, title_name, 
     
         n_waveforms = min(length(spike_times_this), n_random_spikes);
         idx_rand = randperm(length(spike_times_this), n_waveforms);
-        waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+        waveforms = zeros(n_waveforms, n_channels, diff(waveform_window)+1);
+        idx_remove = [];
         for j = 1:n_waveforms
-            waveforms(j,:,:) = mmap.Data.x(:,...
-                spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
+            t0 = spike_times_this(idx_rand(j)) + waveform_window(1);
+            t1 = spike_times_this(idx_rand(j)) + waveform_window(2);
+            if t0 < 1 || t1 > size(mmap.Data.x, 2)
+                idx_remove = [idx_remove, j];
+                continue
+            end
+            waveforms(j,:,:) = mmap.Data.x(:, t0:t1);
         end
+        waveforms(idx_remove,:,:) = [];
         
         waveforms_all{k} = waveforms;
         mean_waveforms{k} = squeeze(mean(waveforms, 1)); % 383 x 64
@@ -39,7 +46,7 @@ function plotClusterComparison(folder_data, spike_id_A, spike_id_B, title_name, 
     end
     
     ch_included = [];
-    for k = 1:ops.Nchan
+    for k = 1:n_channels
         for j = 1:2
             ch_this = sorted_channels{j}(k);
             if ~any(ch_included == ch_this)
@@ -56,7 +63,7 @@ function plotClusterComparison(folder_data, spike_id_A, spike_id_B, title_name, 
     end
     
     % compute the included channel ids
-    channels = [1:ops.Nchan, 1:ops.Nchan];
+    channels = [1:n_channels, 1:n_channels];
     ptp = [max(mean_waveforms{1}, [], 2) - min(mean_waveforms{1}, [], 2);...
         max(mean_waveforms{2}, [], 2) - min(mean_waveforms{2}, [], 2)];
     

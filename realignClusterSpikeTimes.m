@@ -19,15 +19,16 @@ verbose = user_settings.realignSpikeTimes.verbose;
 
 % load the data
 spike_times = readNPY(fullfile(folder_data, 'spike_times.npy'));
+spike_time_class = class(spike_times);
 spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
 cluster_group = readtable(fullfile(folder_data, 'cluster_group.tsv'), 'Delimiter', '\t', 'FileType', 'text');
 
-path_data = fullfile(folder_data, 'temp_wh.dat');
-load(fullfile(folder_data, 'ops.mat'));
+path_data = getKilosortTempWhPath(folder_data);
+n_channels = getKilosortNChannels(folder_data);
 
 dir_output = dir(path_data);
-nFileSamp = dir_output.bytes ./ 2 ./ ops.Nchan;
-mmap = memmapfile(path_data, 'Format', {'int16', [ops.Nchan, nFileSamp], 'x'});
+nFileSamp = dir_output.bytes ./ 2 ./ n_channels;
+mmap = memmapfile(path_data, 'Format', {'int16', [n_channels, nFileSamp], 'x'});
 
 % get the good and mua clusters
 cluster_ids = [];
@@ -35,6 +36,11 @@ labels = {};
 if any(strcmpi(cluster_group.Properties.VariableNames, 'group'))
     cluster_ids = cluster_group.cluster_id(strcmpi(cluster_group.group, 'good') | strcmpi(cluster_group.group, 'mua'));
     labels = cluster_group.group(strcmpi(cluster_group.group, 'good') | strcmpi(cluster_group.group, 'mua'));
+end
+
+if isempty(cluster_ids)
+    disp('No good/mua clusters found. Spike times are not realigned.');
+    return
 end
 
 % realign
@@ -48,16 +54,17 @@ for k = 1:length(cluster_ids)
     % get the largest channel
     n_waveforms = min(length(spike_times_this), n_random_spikes);
     idx_rand = randperm(length(spike_times_this), n_waveforms);
-    waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+    waveforms = zeros(n_waveforms, n_channels, diff(waveform_window)+1);
 
     idx_remove = [];
     for j = 1:n_waveforms
-        if spike_times_this(idx_rand(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+        t0 = spike_times_this(idx_rand(j)) + waveform_window(1);
+        t1 = spike_times_this(idx_rand(j)) + waveform_window(2);
+        if t0 < 1 || t1 > size(mmap.Data.x, 2)
             idx_remove = [idx_remove, j];
             continue
         end
-        waveforms(j,:,:) = mmap.Data.x(:,...
-            spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
+        waveforms(j,:,:) = mmap.Data.x(:, t0:t1);
     end
     waveforms(idx_remove,:,:) = [];
 
@@ -78,7 +85,11 @@ for k = 1:length(cluster_ids)
 
     % realign the spike times
     assert(length(dsample_template) == 1);
-    spike_times_this = spike_times_this + uint64(dsample_template);
+    spike_times_this = int64(spike_times_this) + int64(dsample_template);
+    if any(spike_times_this < 0)
+        error('Realigned spike times contain negative samples for cluster %d.', cluster_ids(k));
+    end
+    spike_times_this = cast(spike_times_this, spike_time_class);
     spike_times(spike_ids) = spike_times_this;
     
     if mod(k, 20) == 1

@@ -63,4 +63,8 @@ function [hit_rate, miss_rate] = nearestNeighborHitRate(pcs, cluster_ids, unit_i
     hit_rate = mean(this_cluster_nearest(:) <= num_obs_this_unit);
     miss_rate = mean(other_cluster_nearest(:) <= num_obs_this_unit);
 
+    if isnan(hit_rate)
+        error('NaN value found in NN hit rate for unit %d!\n', unit_id);
+    end
+
 end

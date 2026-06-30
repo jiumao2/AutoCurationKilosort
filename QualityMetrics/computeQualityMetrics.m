@@ -3,7 +3,7 @@ function computeQualityMetrics(folder_data, user_settings)
 %
 % - Input
 %   - folder_data: the folder where the data is located
-%   - user_settings: the global settings
+%   - user_settings: the global settings or the qualityMetrics settings block
 % 
 % Output:
 %   QualityMetrics.mat will be generated
@@ -45,18 +45,28 @@ if nargin < 1
     folder_data = './';
 end
 
-if nargin < 2
-    num_channels_to_compare = 7;
-    max_spikes_for_unit = 500;
-    max_spikes_for_nn = 10000;
-    n_neighbors = 4;
-    n_silhouette = 10000;
-else
-    num_channels_to_compare = user_settings.num_channels_to_compare;
-    max_spikes_for_unit = user_settings.max_spikes_for_unit;
-    max_spikes_for_nn = user_settings.max_spikes_for_nn;
-    n_neighbors = user_settings.n_neighbors;
-    n_silhouette = user_settings.n_silhouette;    
+num_channels_to_compare = 7;
+max_spikes_for_unit = 500;
+max_spikes_for_nn = 10000;
+n_neighbors = 4;
+
+if nargin >= 2 && ~isempty(user_settings)
+    if isfield(user_settings, 'qualityMetrics')
+        user_settings = user_settings.qualityMetrics;
+    end
+
+    if isfield(user_settings, 'num_channels_to_compare')
+        num_channels_to_compare = user_settings.num_channels_to_compare;
+    end
+    if isfield(user_settings, 'max_spikes_for_unit')
+        max_spikes_for_unit = user_settings.max_spikes_for_unit;
+    end
+    if isfield(user_settings, 'max_spikes_for_nn')
+        max_spikes_for_nn = user_settings.max_spikes_for_nn;
+    end
+    if isfield(user_settings, 'n_neighbors')
+        n_neighbors = user_settings.n_neighbors;
+    end
 end
 
 % read the data
@@ -114,7 +124,7 @@ end
 
 %% PC based metrics
 % load files
-chanMap = load(fullfile(folder_data, 'chanMap.mat'));
+chanMap = getKilosortChanMap(folder_data);
 pc_features = readNPY(fullfile(folder_data, 'pc_features.npy'));
 pc_feature_ind = double(readNPY(fullfile(folder_data, 'pc_feature_ind.npy')));
 spike_templates = double(readNPY(fullfile(folder_data, 'spike_templates.npy')));

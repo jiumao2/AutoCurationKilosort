@@ -33,13 +33,13 @@ threshold = user_settings.removeNoiseInsideCluster.threshold;
 verbose = user_settings.removeNoiseInsideCluster.verbose;
 waveform_window = user_settings.removeNoiseInsideCluster.waveform_window;
 
-path_data = fullfile(folder_data, 'temp_wh.dat');
+path_data = getKilosortTempWhPath(folder_data);
 spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
 spike_times = readNPY(fullfile(folder_data, 'spike_times.npy'));
 spike_templates = readNPY(fullfile(folder_data, 'spike_templates.npy'));
 pc_features = readNPY(fullfile(folder_data, 'pc_features.npy'));
 pc_feature_ind = readNPY(fullfile(folder_data, 'pc_feature_ind.npy'));
-load(fullfile(folder_data, 'ops.mat'));
+n_channels = getKilosortNChannels(folder_data);
 
 % Get the IDs of non-noise clusters
 cluster_group = readtable(fullfile(folder_data, 'cluster_group.tsv'), 'Delimiter', '\t', 'FileType', 'text');
@@ -55,8 +55,8 @@ cluster_non_noise = setdiff(cluster_ids, cluster_noise);
 % Clean the waveforms in non-noise clusters
 disp('Start detecting the noise inside clusters!');
 dir_output = dir(path_data);
-nFileSamp = dir_output.bytes ./ 2 ./ ops.Nchan;
-mmap = memmapfile(path_data, 'Format', {'int16', [ops.Nchan, nFileSamp], 'x'});
+nFileSamp = dir_output.bytes ./ 2 ./ n_channels;
+mmap = memmapfile(path_data, 'Format', {'int16', [n_channels, nFileSamp], 'x'});
 
 for k = 1:length(cluster_non_noise)
     id = cluster_non_noise(k);
@@ -65,17 +65,18 @@ for k = 1:length(cluster_non_noise)
 
     n_waveforms = min(length(spike_times_this), n_random_spikes);
     idx_rand = randperm(length(spike_times_this), n_waveforms);
-    waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+    waveforms = zeros(n_waveforms, n_channels, diff(waveform_window)+1);
 
     idx_remove = [];
     for j = 1:n_waveforms
-        if spike_times_this(idx_rand(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+        t0 = spike_times_this(idx_rand(j)) + waveform_window(1);
+        t1 = spike_times_this(idx_rand(j)) + waveform_window(2);
+        if t0 < 1 || t1 > size(mmap.Data.x, 2)
             idx_remove = [idx_remove, j];
             continue
         end
 
-        waveforms(j,:,:) = mmap.Data.x(:,...
-            spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
+        waveforms(j,:,:) = mmap.Data.x(:, t0:t1);
     end
     waveforms(idx_remove,:,:) = [];
     
@@ -118,15 +119,17 @@ for k = 1:length(cluster_non_noise)
         n_outliers = sum(is_outliers);
         idx_outlier = find(is_outliers);
 
-        waveforms_outliers = zeros(n_outliers, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+        waveforms_outliers = zeros(n_outliers, n_channels, diff(waveform_window)+1);
         idx_remove = [];
         for j = 1:n_outliers
-            if spike_times_this(idx_outlier(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+            t0 = spike_times_this(idx_outlier(j)) + waveform_window(1);
+            t1 = spike_times_this(idx_outlier(j)) + waveform_window(2);
+            if t0 < 1 || t1 > size(mmap.Data.x, 2)
                 idx_remove = [idx_remove, j];
                 continue
             end
 
-            waveforms_outliers(j,:,:) = mmap.Data.x(:, spike_times_this(idx_outlier(j)) + waveform_window(1):spike_times_this(idx_outlier(j)) + waveform_window(2));
+            waveforms_outliers(j,:,:) = mmap.Data.x(:, t0:t1);
         end
         waveforms_outliers(idx_remove,:,:) = [];
 

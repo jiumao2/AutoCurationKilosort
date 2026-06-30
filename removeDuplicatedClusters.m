@@ -35,11 +35,11 @@ end
 cluster_id_non_noise = setdiff(cluster_ids, cluster_id_noise);
 
 % get the channels of the largest amplitudes of each clusters
-path_data = fullfile(folder_data, 'temp_wh.dat');
-load(fullfile(folder_data, 'ops.mat'));
+path_data = getKilosortTempWhPath(folder_data);
+n_channels = getKilosortNChannels(folder_data);
 dir_output = dir(path_data);
-nFileSamp = dir_output.bytes ./ 2 ./ ops.Nchan;
-mmap = memmapfile(path_data, 'Format', {'int16', [ops.Nchan, nFileSamp], 'x'});
+nFileSamp = dir_output.bytes ./ 2 ./ n_channels;
+mmap = memmapfile(path_data, 'Format', {'int16', [n_channels, nFileSamp], 'x'});
 ch_largest = zeros(1, length(cluster_id_non_noise));
 
 disp('Computing the channel with largest amplitudes...');
@@ -47,16 +47,17 @@ for k = 1:length(cluster_id_non_noise)
     spike_times_this = spike_times(spike_clusters == cluster_id_non_noise(k));
     n_waveforms = min(length(spike_times_this), n_random_spikes);
     idx_rand = randperm(length(spike_times_this), n_waveforms);
-    waveforms = zeros(n_waveforms, ops.Nchan, diff(waveform_window)+1); % nSpikes x 383 x 64
+    waveforms = zeros(n_waveforms, n_channels, diff(waveform_window)+1);
 
     idx_remove = [];
     for j = 1:n_waveforms
-        if spike_times_this(idx_rand(j)) + waveform_window(2) > size(mmap.Data.x, 2)
+        t0 = spike_times_this(idx_rand(j)) + waveform_window(1);
+        t1 = spike_times_this(idx_rand(j)) + waveform_window(2);
+        if t0 < 1 || t1 > size(mmap.Data.x, 2)
             idx_remove = [idx_remove, j];
             continue
         end
-        waveforms(j,:,:) = mmap.Data.x(:,...
-            spike_times_this(idx_rand(j)) + waveform_window(1):spike_times_this(idx_rand(j)) + waveform_window(2));
+        waveforms(j,:,:) = mmap.Data.x(:, t0:t1);
     end
     waveforms(idx_remove,:,:) = [];
 
