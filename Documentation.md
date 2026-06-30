@@ -19,7 +19,7 @@ The curation process runs through the following sequential steps:
 3. **Split & Merge Detection *(Optional)*:** Identifies potential cluster splits and merges. This step flags them for review but does not modify the data, allowing the user to finalize the split/merge manually in `phy`.
 4. **Duplicate Removal:** Identifies and resolves duplicated units. Two units are flagged as duplicates if they share the same peak amplitude channel and have overlapping spike times (default: 10% of spikes occurring within 0.5 ms of each other). The unit with fewer overall spikes is removed.
 5. **Quality Metrics Computation:** Calculates standardized [ECEPHYS quality metrics](https://allensdk.readthedocs.io/en/latest/_static/examples/nb/ecephys_quality_metrics.html), including: *ISI violations, Amplitude cutoffs, Presence ratio, Median Amplitude, Isolation distance, D prime, Nearest-neighbor miss rate, Nearest-neighbor hit rate,* and *L ratio*.
-6. **Automated Labeling:** Classifies units as `'good'` or `'mua'` (multi-unit activity) based on user-defined thresholds. 
+6. **Automated Labeling:** Classifies units as `'good'` or `'mua'` (multi-unit activity) based on user-defined thresholds. Units that remain unclassified after this step appear as `unsorted` in Phy; in this pipeline, they did not pass the `'mua'` criteria and should be treated as lower quality than MUA.
 7. **Spike Time Realignment:** Adjusts the spike times of each cluster to perfectly center the troughs of the waveforms.
 
 ### Default Quality Criteria
@@ -29,6 +29,8 @@ The curation process runs through the following sequential steps:
 | **Presence Ratio** | > 0.95 | > 0.90 |
 | **Amplitude Cutoffs** | < 0.05 | < 0.10 |
 | **NN Hit Rate** | > 0.80 | N/A |
+
+After AutoCurationKilosort, the intended unit-quality order is: `'good'` > `'mua'` > `unsorted` > `'noise'`. The `unsorted` category is not an additional accepted unit class; it marks units that were not rejected as obvious noise but also failed to meet the MUA thresholds.
 
 ---
 
@@ -115,4 +117,5 @@ Determining unit quality visually can be highly subjective and difficult to repr
 * **Solution:** The pipeline uses strict, quantitative metrics to categorize units, ensuring consistency:
   * **`good`**: Well-isolated units. Characterized by a clear waveform, high SNR, clean ISI histogram, healthy autocorrelogram, and tight amplitude distribution.
   * **`mua`**: Multi-unit activity. The cluster contains viable neural data but is not cleanly isolated enough to be considered a single unit.
+  * **`unsorted`**: Units left unclassified in Phy after AutoCurationKilosort. These units did not pass the MUA criteria, so they should be treated as worse than MUA but not necessarily as obvious noise.
   * **`noise`**: Highly contaminated clusters (filtered out).

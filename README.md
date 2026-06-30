@@ -23,6 +23,8 @@ The tool processes your Kilosort output through a sequential, automated pipeline
 5. **Automated Labeling:** Classifies units as `'good'` or `'mua'` (multi-unit activity) based on the computed quality metrics.
 6. **Waveform Alignment:** Centers the troughs of the waveforms to the precise spike times for accurate visualization and downstream analysis.
 
+After AutoCurationKilosort, the intended unit-quality order is: `'good'` > `'mua'` > `unsorted` > `'noise'`. The `unsorted` category is not an additional accepted unit class; it marks units that were not rejected as obvious noise but also failed to meet the MUA thresholds.
+
 ## 🚀 Getting Started
 
 ### 1. Installation
