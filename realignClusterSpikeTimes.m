@@ -72,7 +72,7 @@ for k = 1:length(cluster_ids)
     [~, idx_sort] = sort(max(mean_waveforms,[],2) - min(mean_waveforms,[],2), 'descend');
     ch_largest = idx_sort(1);
     
-    baseline = mean(mean_waveforms(baseline_window));
+    baseline = mean(mean_waveforms(ch_largest, baseline_window(1):baseline_window(2)));
     if abs(max(mean_waveforms(ch_largest,:))- baseline) < abs(min(mean_waveforms(ch_largest,:))- baseline)
         unit_type = 1;
         [~, idx_min] = min(mean_waveforms(ch_largest,:));

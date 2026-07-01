@@ -70,7 +70,7 @@ for k = 1:length(cluster_ids)
     ch_largest = idx_sort(1);
     ch_included = idx_sort(1:n_channels_included);
     
-    baseline = mean(mean_waveforms(baseline_window));
+    baseline = mean(mean_waveforms(ch_largest, baseline_window(1):baseline_window(2)));
     if abs(max(mean_waveforms(ch_largest,:))- baseline) < abs(min(mean_waveforms(ch_largest,:))- baseline)
         unit_type = 1;
         [~, idx_min] = min(mean_waveforms(ch_largest,:));
