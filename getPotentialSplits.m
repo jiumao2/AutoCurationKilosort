@@ -24,7 +24,7 @@ n_random_spikes = user_settings.splitting.n_random_spikes;
 waveform_window = user_settings.splitting.waveform_window;
 n_channels_included = user_settings.splitting.n_channels_included;
 hartigans_dip_test_alpha = user_settings.splitting.hartigans_dip_test_alpha;
-verbose = user_settings.merging.verbose;
+verbose = user_settings.splitting.verbose;
 
 % load the data
 spike_times = readNPY(fullfile(folder_data, 'spike_times.npy'));
