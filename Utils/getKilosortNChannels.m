@@ -1,40 +1,50 @@
 function n_channels = getKilosortNChannels(folder_data)
-%GETKILOSORTNCHANNELS Return the effective Kilosort channel count.
+%GETKILOSORTNCHANNELS Return the binary channel count for temp_wh.dat.
 %
-% Prefer channel_map.npy because it is a numeric Kilosort output available
-% in both Kilosort 2.5 and Kilosort 4. Fall back to ops.mat for older
-% outputs that do not include channel_map.npy.
+% Kilosort/Phy store the binary row count in params.py as n_channels_dat.
+% This can be larger than channel_map.npy when the binary keeps an extra
+% sync channel. Fall back to ops.mat for older outputs.
 
-path_channel_map = fullfile(folder_data, 'channel_map.npy');
-path_channel_positions = fullfile(folder_data, 'channel_positions.npy');
+path_params = fullfile(folder_data, 'params.py');
 path_ops = fullfile(folder_data, 'ops.mat');
+path_temp_wh = fullfile(folder_data, 'temp_wh.dat');
 
-if isfile(path_channel_map)
-    channel_map = readNPY(path_channel_map);
-    n_channels = numel(channel_map);
+n_channels = [];
 
-    if isfile(path_channel_positions)
-        channel_positions = readNPY(path_channel_positions);
-        if size(channel_positions, 1) ~= n_channels
-            error(['channel_positions.npy has %d rows, but channel_map.npy ', ...
-                'contains %d channels in %s.'], ...
-                size(channel_positions, 1), n_channels, folder_data);
-        end
+if isfile(path_params)
+    params_text = fileread(path_params);
+    token = regexp(params_text, 'n_channels_dat\s*=\s*(\d+)', 'tokens', 'once');
+    if ~isempty(token)
+        n_channels = str2double(token{1});
     end
-    return
 end
 
-if isfile(path_ops)
+if isempty(n_channels) && isfile(path_ops)
     data = load(path_ops, 'ops');
     if isfield(data, 'ops') && isfield(data.ops, 'Nchan')
         n_channels = data.ops.Nchan;
-        return
+    else
+        error('ops.mat exists but does not contain ops.Nchan in %s.', folder_data);
     end
-
-    error('ops.mat exists but does not contain ops.Nchan in %s.', folder_data);
 end
 
-error(['Cannot determine Kilosort channel count in %s. Expected ', ...
-    'channel_map.npy or ops.mat with ops.Nchan.'], folder_data);
+if isempty(n_channels)
+    error(['Cannot determine Kilosort channel count in %s. Expected ', ...
+        'params.py with n_channels_dat or ops.mat with ops.Nchan.'], ...
+        folder_data);
+end
+
+if ~isscalar(n_channels) || ~isfinite(n_channels) || n_channels < 1 || ...
+        n_channels ~= round(n_channels)
+    error('Invalid Kilosort channel count %g in %s.', n_channels, folder_data);
+end
+
+if isfile(path_temp_wh)
+    file_info = dir(path_temp_wh);
+    if mod(file_info.bytes, 2 * n_channels) ~= 0
+        error(['temp_wh.dat size in %s is not divisible by int16 x ', ...
+            '%d channels.'], folder_data, n_channels);
+    end
+end
 
 end
