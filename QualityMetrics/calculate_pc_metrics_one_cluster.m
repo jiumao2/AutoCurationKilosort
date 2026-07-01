@@ -56,6 +56,15 @@ function [isolation_distance, d_prime, nn_miss_rate, nn_hit_rate, l_ratio] = cal
     all_pcs = reshape(all_pcs, size(all_pcs, 1), size(pc_features, 2) * length(channels_to_use));
 
     if size(all_pcs, 1) > 10 && ...
+        all(all_labels == cluster_id) && ...
+        sum(all_labels == cluster_id) > 20 && ...
+        ~isempty(channels_to_use)
+        isolation_distance = NaN;
+        d_prime = NaN;
+        nn_miss_rate = 0;
+        nn_hit_rate = 1;
+        l_ratio = NaN;
+    elseif size(all_pcs, 1) > 10 && ...
         ~all(all_labels == cluster_id) && ... % Not all labels are this cluster
         sum(all_labels == cluster_id) > 20 && ... % No fewer than 20 spikes in this cluster
         ~isempty(channels_to_use)
