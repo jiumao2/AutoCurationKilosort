@@ -18,7 +18,7 @@ The tool processes your Kilosort output through a sequential, automated pipeline
 
 1. **Noise Filtering:** Removes clearly bad units based on predefined Signal-to-Noise Ratio (SNR) thresholds.
 2. **Outlier Rejection:** Identifies and removes outliers within each cluster in the Principal Component (PC) feature space.
-3. **Split & Merge Detection:** Optionally flags potential splits and merges for review without modifying the data.
+3. **Duplicate Removal:** Identifies and resolves duplicated units with highly overlapping spike times.
 4. **Metric Computation:** Calculates standardized quality metrics for each remaining unit.
 5. **Automated Labeling:** Classifies units as `'good'` or `'mua'` (multi-unit activity) based on the computed quality metrics.
 6. **Waveform Alignment:** Centers the troughs of the waveforms to the precise spike times for accurate visualization and downstream analysis.

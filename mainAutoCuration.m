@@ -17,13 +17,6 @@ detectNoiseClusters(folder_data, userSettings);
 % clean the waveforms in each cluster
 removeNoiseInsideCluster(folder_data, userSettings);
 
-% % optional: detect potential splits and merges
-% % split
-% split_info = getPotentialSplits(folder_data, userSettings);
-% 
-% % merge
-% getPotentialMerges(folder_data, userSettings);
-
 % remove duplicated clusters
 removeDuplicatedClusters(folder_data, userSettings);
 

@@ -16,11 +16,10 @@ The curation process runs through the following sequential steps:
 
 1. **Noise Filtering:** Discards units with a critically low firing rate (default: < 0.05 Hz) and low Signal-to-Noise Ratio (default: SNR < 3).
 2. **Outlier Rejection:** Removes spike outliers within each cluster in the 2D Principal Component (PC) feature space. This is calculated using the Median Absolute Deviation (MAD, default threshold: 5). A valid spike should not register as an outlier in any dimension.
-3. **Split & Merge Detection *(Optional)*:** Identifies potential cluster splits and merges. This step flags them for review but does not modify the data, allowing the user to finalize the split/merge manually in `phy`.
-4. **Duplicate Removal:** Identifies and resolves duplicated units. Two units are flagged as duplicates if they share the same peak amplitude channel and have overlapping spike times (default: 10% of spikes occurring within 0.5 ms of each other). The unit with fewer overall spikes is removed.
-5. **Quality Metrics Computation:** Calculates standardized [ECEPHYS quality metrics](https://allensdk.readthedocs.io/en/latest/_static/examples/nb/ecephys_quality_metrics.html), including: *ISI violations, Amplitude cutoffs, Presence ratio, Median Amplitude, Isolation distance, D prime, Nearest-neighbor miss rate, Nearest-neighbor hit rate,* and *L ratio*.
-6. **Automated Labeling:** Classifies units as `'good'` or `'mua'` (multi-unit activity) based on user-defined thresholds. Units that remain unclassified after this step appear as `unsorted` in Phy; in this pipeline, they did not pass the `'mua'` criteria and should be treated as lower quality than MUA.
-7. **Spike Time Realignment:** Adjusts the spike times of each cluster to perfectly center the troughs of the waveforms.
+3. **Duplicate Removal:** Identifies and resolves duplicated units. Two units are flagged as duplicates if they share the same peak amplitude channel and have overlapping spike times (default: 10% of spikes occurring within 0.5 ms of each other). The unit with fewer overall spikes is removed.
+4. **Quality Metrics Computation:** Calculates standardized [ECEPHYS quality metrics](https://allensdk.readthedocs.io/en/latest/_static/examples/nb/ecephys_quality_metrics.html), including: *ISI violations, Amplitude cutoffs, Presence ratio, Median Amplitude, Isolation distance, D prime, Nearest-neighbor miss rate, Nearest-neighbor hit rate,* and *L ratio*.
+5. **Automated Labeling:** Classifies units as `'good'` or `'mua'` (multi-unit activity) based on user-defined thresholds. Units that remain unclassified after this step appear as `unsorted` in Phy; in this pipeline, they did not pass the `'mua'` criteria and should be treated as lower quality than MUA.
+6. **Spike Time Realignment:** Adjusts the spike times of each cluster to perfectly center the troughs of the waveforms.
 
 ### Default Quality Criteria
 | Metric | `'good'` Threshold | `'mua'` Threshold |
@@ -109,7 +108,7 @@ Recordings can suffer from high-amplitude noise artifacts caused by poor groundi
 * **Solution:** The `removeNoiseInsideCluster` function cleans these up by projecting spikes into a PC-feature space and removing outliers using the Median Absolute Deviation (MAD) method (default threshold: 5). Any spike flagged as an outlier in any dimension is discarded.
 
 ### 3. Duplicate Units
-Kilosort may detect the same unit multiple times across different channels. This presents as a shifted waveform shape and an abnormally high central peak in the cross-correlogram (distinct from a falsely split unit).
+Kilosort may detect the same unit multiple times across different channels. This presents as a shifted waveform shape and an abnormally high central peak in the cross-correlogram.
 * **Solution:** The `duplicatedClusters` function resolves this by looking for substantial temporal overlap. If two units share the same peak channel and >10% of their spikes overlap within 0.5 ms, they are flagged as duplicates, and the unit with fewer spikes is removed.
 
 ### 4. Subjectivity in Quality Determination
