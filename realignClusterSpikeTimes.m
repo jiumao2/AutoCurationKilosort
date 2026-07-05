@@ -67,6 +67,9 @@ for k = 1:length(cluster_ids)
         waveforms(j,:,:) = mmap.Data.x(:, t0:t1);
     end
     waveforms(idx_remove,:,:) = [];
+    if isempty(waveforms)
+        continue
+    end
 
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
     [~, idx_sort] = sort(max(mean_waveforms,[],2) - min(mean_waveforms,[],2), 'descend');
@@ -106,7 +109,7 @@ for k = 1:length(cluster_ids)
             'XAxisVisible','on',...
             'YAxisVisible', 'off');
 
-        n_plot = min(100, n_waveforms);
+        n_plot = min(100, size(waveforms, 1));
         idx_plot = randperm(size(waveforms, 1), n_plot);
 
         x_waveform = waveform_window(1):waveform_window(2);
