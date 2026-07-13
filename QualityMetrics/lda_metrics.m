@@ -25,20 +25,20 @@ function d_prime = lda_metrics(all_pcs, all_labels, this_unit_id)
     % Fit Linear Discriminant Analysis
     lda = fitcdiscr(X, y, 'DiscrimType', 'linear');
 
-    % Predict scores for both classes
-    scores = predict(lda, X);
+    % Project data onto the one-dimensional LDA axis, matching
+    % sklearn LinearDiscriminantAnalysis.fit_transform.
+    X_flda = X * lda.Coeffs(1, 2).Linear;
 
-    % Separate projections for this unit and others
-    flda_this_cluster = scores(y);
-    flda_other_cluster = scores(~y);
+    % The sign of an LDA axis is arbitrary. Orient it so d-prime is
+    % positive when this unit is separated from the other spikes.
+    if mean(X_flda(y)) < mean(X_flda(~y))
+        X_flda = -X_flda;
+    end
 
-%     % Project data onto LDA space
-%     X_flda = lda.Coefficients * X';
-% 
-%     flda_this_cluster = X_flda(y, :);
-%     flda_other_cluster = X_flda(~y, :);
+    flda_this_cluster = X_flda(y);
+    flda_other_cluster = X_flda(~y);
 
     d_prime = (mean(flda_this_cluster) - mean(flda_other_cluster)) / ...
-              sqrt(0.5 * (std(flda_this_cluster)^2 + std(flda_other_cluster)^2));
+              sqrt(0.5 * (std(flda_this_cluster, 1)^2 + std(flda_other_cluster, 1)^2));
 
 end
