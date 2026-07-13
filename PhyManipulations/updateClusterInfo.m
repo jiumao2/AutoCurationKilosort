@@ -75,15 +75,15 @@ tbl = table();
 tbl.cluster_id = cluster_id;
 
 % Amplitude
-idx_amp = findSeq(cluster_Amplitude(:,1), cluster_id);
+[~, idx_amp] = ismember(cluster_id, cluster_Amplitude(:,1));
 tbl.Amplitude = cluster_Amplitude(idx_amp, 2);
 
 % ContamPct
-idx_contam = findSeq(cluster_ContamPct(:,1), cluster_id);
+[~, idx_contam] = ismember(cluster_id, cluster_ContamPct(:,1));
 tbl.ContamPct = cluster_ContamPct(idx_contam, 2);
 
 % KSLabel
-idx_kslabel = findSeq(cluster_KSLabel.cluster_id, cluster_id);
+[~, idx_kslabel] = ismember(cluster_id, cluster_KSLabel.cluster_id);
 tbl.KSLabel = cluster_KSLabel.KSLabel(idx_kslabel);
 
 tbl.amp = arrayfun(@(id)median(amplitudes(spike_clusters == id)), cluster_id);
