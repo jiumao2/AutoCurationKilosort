@@ -25,7 +25,8 @@ disp('Updating cluster_info.tsv...');
 
 % read all npy files
 amplitudes = readNPY(fullfile(folder_data, 'amplitudes.npy'));
-% channel_map = readNPY(fullfile(folder_data, 'channel_map.npy'));
+channel_map = double(readNPY(fullfile(folder_data, 'channel_map.npy')));
+channel_map = channel_map(:);
 channel_positions = readNPY(fullfile(folder_data, 'channel_positions.npy'));
 spike_times = readNPY(fullfile(folder_data, 'spike_times.npy'));
 spike_clusters = readNPY(fullfile(folder_data, 'spike_clusters.npy'));
@@ -50,6 +51,11 @@ n_templates = size(templates, 1);
 ch_templates_ind0 = arrayfun(@(k) templates_ind(k, idx_max(k)), (1:n_templates)');
 cluster_templates_ind0 = arrayfun(@(id)mode(spike_templates(spike_clusters == id)), cluster_id);
 ch_ind0 = ch_templates_ind0(cluster_templates_ind0+1);
+if numel(channel_map) ~= size(channel_positions, 1) || ...
+        any(ch_ind0 < 0 | ch_ind0 >= numel(channel_map) | ch_ind0 ~= floor(ch_ind0))
+    error('Invalid local channel index or inconsistent channel_map.npy in %s.', folder_data);
+end
+ch_binary0 = channel_map(ch_ind0 + 1);
 depth = channel_positions(ch_ind0+1, 2);
 
 % group
@@ -81,7 +87,7 @@ idx_kslabel = findSeq(cluster_KSLabel.cluster_id, cluster_id);
 tbl.KSLabel = cluster_KSLabel.KSLabel(idx_kslabel);
 
 tbl.amp = arrayfun(@(id)median(amplitudes(spike_clusters == id)), cluster_id);
-tbl.ch = ch_ind0;
+tbl.ch = ch_binary0;
 tbl.depth = depth;
 tbl.fr = fr;
 tbl.group = group;

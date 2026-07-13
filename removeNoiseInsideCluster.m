@@ -40,6 +40,9 @@ spike_templates = readNPY(fullfile(folder_data, 'spike_templates.npy'));
 pc_features = readNPY(fullfile(folder_data, 'pc_features.npy'));
 pc_feature_ind = readNPY(fullfile(folder_data, 'pc_feature_ind.npy'));
 n_channels = getKilosortNChannels(folder_data);
+% local contact ID -> raw temp_wh.dat row ID (both 0-based)
+channel_map = double(readNPY(fullfile(folder_data, 'channel_map.npy')));
+channel_map = channel_map(:);
 
 % Get the IDs of non-noise clusters
 cluster_group = readtable(fullfile(folder_data, 'cluster_group.tsv'), 'Delimiter', '\t', 'FileType', 'text');
@@ -81,8 +84,11 @@ for k = 1:length(cluster_non_noise)
     waveforms(idx_remove,:,:) = [];
     
     mean_waveforms = squeeze(mean(waveforms, 1)); % 383 x 64
-    [~, ch_largest] = max(max(mean_waveforms,[],2) - min(mean_waveforms,[],2));
-    ch_largest_ind0 = ch_largest-1;
+    ptt = max(mean_waveforms,[],2) - min(mean_waveforms,[],2);
+    % PC features use local IDs; waveform indexing uses raw MATLAB row IDs.
+    [~, ch_largest_local1] = max(ptt(channel_map + 1));
+    ch_largest_ind0 = ch_largest_local1 - 1;
+    ch_largest = channel_map(ch_largest_local1) + 1;
 
     % detect outliers
     is_outliers = false(1, length(spike_times_this));
